@@ -28,7 +28,10 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
-    transaction_type = Column(Enum(TransactionType), nullable=True)
+    transaction_type = Column(
+        Enum(TransactionType, name="transaction_type", create_type=False),
+        nullable=False,
+    )
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
@@ -40,7 +43,10 @@ class SubCategory(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
-    transaction_type = Column(Enum(TransactionType), nullable=True)
+    transaction_type = Column(
+        Enum(TransactionType, name="transaction_type", create_type=False),
+        nullable=False,
+    )
     category_id = Column(
         Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
     )
