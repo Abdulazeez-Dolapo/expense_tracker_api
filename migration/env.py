@@ -1,11 +1,9 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config, MetaData
+from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
 from app.config.database import DB_URL
-from app.models import user, tags, transaction
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,19 +18,7 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-def combine_metadata(*args):
-    m = MetaData()
-    for metadata in args:
-        for t in metadata.tables.values():
-            t.tometadata(m)
-    return m
-
-
-# The line withe combine_metadata function also works but I found out that it's not needed.
-# Alembic will automatically generate the files as long as the other models are imported in this file.
-
-# target_metadata = combine_metadata(user.Base.metadata, tags.Base.metadata, transactions.Base.metadata)
-target_metadata = user.Base.metadata
+target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
