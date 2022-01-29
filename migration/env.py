@@ -5,7 +5,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.config.database import DB_URL
-from app.models import user
+from app.models import user, tags, transaction
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -28,7 +28,11 @@ def combine_metadata(*args):
     return m
 
 
-target_metadata = combine_metadata(user.Base.metadata)
+# The line withe combine_metadata function also works but I found out that it's not needed.
+# Alembic will automatically generate the files as long as the other models are imported in this file.
+
+# target_metadata = combine_metadata(user.Base.metadata, tags.Base.metadata, transactions.Base.metadata)
+target_metadata = user.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
