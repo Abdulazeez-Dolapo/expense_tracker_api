@@ -15,7 +15,7 @@ class Transaction(Base):
     name = Column(String, nullable=False)
     amount = Column(Integer, nullable=False)
     date = Column(Date, nullable=False)
-    time = Column(Time, nullable=False)
+    time = Column(Time(timezone=True), nullable=False)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     subcategory_id = Column(Integer, ForeignKey("subcategories.id"), nullable=False)
     label_id = Column(Integer, ForeignKey("labels.id"), nullable=False)
