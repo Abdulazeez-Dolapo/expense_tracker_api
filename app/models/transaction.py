@@ -1,5 +1,3 @@
-import enum
-
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Date, Time
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -21,7 +19,10 @@ class Transaction(Base):
     label_id = Column(Integer, ForeignKey("labels.id"), nullable=False)
     status = Column(String, nullable=False)
     notes = Column(String, nullable=False)
-    transaction_type = Column(Enum(TransactionType), nullable=True)
+    transaction_type = Column(
+        Enum(TransactionType, name="transaction_type", create_type=False),
+        nullable=False,
+    )
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
