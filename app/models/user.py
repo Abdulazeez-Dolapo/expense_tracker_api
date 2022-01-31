@@ -13,7 +13,7 @@ class User(Base):
     access_token = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
     password = Column(String, nullable=False)
-    is_premium = Column(Boolean, server_default="False", nullable=False)
+    is_premium = Column(Boolean, server_default="false", nullable=False)
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
