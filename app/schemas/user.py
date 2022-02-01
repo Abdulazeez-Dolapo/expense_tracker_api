@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from typing import Optional
 
 
 class User(BaseModel):
@@ -31,3 +31,7 @@ class RegisterResponse(BaseModel):
 class LoginResponse(Token, BaseModel):
     class Config:
         orm_mode = True
+
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
