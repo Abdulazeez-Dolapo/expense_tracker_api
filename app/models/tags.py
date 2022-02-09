@@ -8,8 +8,8 @@ from ..config.database import Base
 
 
 class TransactionType(enum.Enum):
-    Income = 1
-    Expense = 2
+    Income = "Income"
+    Expense = "Expense"
 
 
 class Label(Base):
