@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from .routers import root, auth, label, category
+from .routers import root, auth, label, category, subcategory
 from .config.env import environment_variables
 
 app = FastAPI()
@@ -24,3 +24,4 @@ app.include_router(root.router)
 app.include_router(auth.router)
 app.include_router(label.router)
 app.include_router(category.router)
+app.include_router(subcategory.router)
