@@ -3,13 +3,15 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from ..oauth2 import get_current_user
+
+from ..oauth2 import get_current_user, get_current_user_if_token
 from ..config.database import get_db
 from ..models.tags import Category
 from ..schemas.category import (
     CategoryRequest,
     CreateCategoryResponse,
     FetchAllCategoriesResponse,
+    FetchCategoryResponse,
 )
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -85,16 +87,47 @@ async def delete_category(
     if category == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Label with id {id} not found",
+            detail=f"category with id {id} not found",
         )
 
     if category.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"You can only delete labels you created",
+            detail=f"You can only delete categories you created",
         )
 
     query.delete(synchronize_session=False)
     db.commit()
 
     return
+
+
+@router.get("/{id}", response_model=FetchCategoryResponse)
+async def fetch_category(
+    id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user_if_token),
+):
+    query = db.query(Category).filter(Category.id == id)
+    category = query.first()
+
+    if category == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Category with id {id} not found",
+        )
+
+    if user == None:
+        if category.user_id != None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"You can only see default or categories you created",
+            )
+    else:
+        if category.user_id != None and category.user_id != user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"You can only see default or categories you created",
+            )
+
+    return {"category": category}

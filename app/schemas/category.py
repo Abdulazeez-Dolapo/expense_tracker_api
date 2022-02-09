@@ -31,3 +31,10 @@ class FetchAllCategoriesResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FetchCategoryResponse(BaseModel):
+    category: Category
+
+    class Config:
+        orm_mode = True

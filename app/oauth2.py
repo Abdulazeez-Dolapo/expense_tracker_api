@@ -31,30 +31,27 @@ def create_access_token(data: dict, time_to_expire: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def verify_access_token(token: str, credentials_exception: Exception):
+def verify_access_token(
+    token: str, credentials_exception: Exception, isAuthRequired: bool = True
+):
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
         id: str = payload.get("user_id")
 
-        if id is None:
+        if id is None and isAuthRequired is True:
             raise credentials_exception
 
         token_data = TokenData(id=id)
+        return token_data
     except JWTError:
-        raise credentials_exception
-
-    return token_data
+        if isAuthRequired is True:
+            raise credentials_exception
 
 
 async def get_current_user(
-    request: Request,
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
-    isAuthRequired: bool = True,
 ):
-    if isAuthRequired is False and request.method == "GET":
-        return None
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -66,5 +63,25 @@ async def get_current_user(
 
     if user is None:
         raise credentials_exception
+
+    return user
+
+
+async def get_current_user_if_token(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    token_data = verify_access_token(token, credentials_exception, False)
+    user = (
+        db.query(User).filter_by(id=token_data.id).first()
+        if token_data != None
+        else None
+    )
 
     return user
