@@ -1,4 +1,4 @@
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends, status, HTTPException, Request
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Optional
@@ -47,8 +47,14 @@ def verify_access_token(token: str, credentials_exception: Exception):
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+    isAuthRequired: bool = True,
 ):
+    if isAuthRequired is False and request.method == "GET":
+        return None
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
