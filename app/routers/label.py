@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 from ..oauth2 import get_current_user
 from ..config.database import get_db
 from ..models.tags import Label
-from ..schemas.label import LabelRequest, CreateLabelResponse, FetchAllLabelsResponse
+from ..schemas.label import (
+    LabelRequest,
+    CreateLabelResponse,
+    FetchAllLabelsResponse,
+)
 
 router = APIRouter(prefix="/labels", tags=["labels"])
 
@@ -66,3 +70,29 @@ async def fetch_all_labels(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while trying to fetch labels.",
         )
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_label(
+    id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)
+):
+    query = db.query(Label).filter(Label.id == id)
+
+    label = query.first()
+
+    if label == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Label with id {id} not found",
+        )
+
+    if label.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only delete labels you created",
+        )
+
+    query.delete(synchronize_session=False)
+    db.commit()
+
+    return
