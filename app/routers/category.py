@@ -48,7 +48,7 @@ async def create_category(
 @router.get("/", response_model=FetchAllCategoriesResponse)
 async def fetch_categories(
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(get_current_user_if_token),
     limit: int = 20,
     page: int = 1,
 ):

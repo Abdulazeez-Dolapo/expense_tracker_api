@@ -3,7 +3,7 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from ..oauth2 import get_current_user
+from ..oauth2 import get_current_user, get_current_user_if_token
 from ..config.database import get_db
 from ..models.tags import Label
 from ..schemas.label import (
@@ -46,7 +46,7 @@ async def create_label(
 @router.get("/", response_model=FetchAllLabelsResponse)
 async def fetch_all_labels(
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(get_current_user_if_token),
     limit: int = 20,
     page: int = 1,
 ):
