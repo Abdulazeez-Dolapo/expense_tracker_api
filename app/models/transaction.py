@@ -25,7 +25,7 @@ class Transaction(Base):
         Enum(TransactionType, name="transaction_type", create_type=False),
         nullable=False,
     )
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
