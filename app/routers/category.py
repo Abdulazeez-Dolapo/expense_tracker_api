@@ -2,7 +2,7 @@ from fastapi import status, Depends, APIRouter
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.functions import func
+
 
 from ..oauth2 import get_current_user, get_current_user_if_token
 from ..config.database import get_db
@@ -12,6 +12,7 @@ from ..schemas.category import (
     CreateCategoryResponse,
     FetchAllCategoriesResponse,
     FetchCategoryResponse,
+    CategoryUpdateRequest,
 )
 
 router = APIRouter(prefix="/categories", tags=["categories"])
@@ -134,3 +135,39 @@ async def fetch_category(
             )
 
     return {"category": category}
+
+
+@router.put("/{id}", response_model=CreateCategoryResponse)
+async def update_category(
+    id: int,
+    category: CategoryUpdateRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    category_query = db.query(Category).filter(Category.id == id)
+    stored_category = category_query.first()
+
+    if stored_category == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Category with id {id} not found",
+        )
+
+    if stored_category.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only edit categories you created",
+        )
+
+    try:
+        category_query.update(category.dict(), synchronize_session=False)
+        db.commit()
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while trying to update the category.",
+        )
+
+    return stored_category

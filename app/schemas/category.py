@@ -46,3 +46,11 @@ class FetchCategoryResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CategoryUpdateRequest(BaseModel):
+    name: str
+    transaction_type: TransactionType
+
+    class Config:
+        orm_mode = True
