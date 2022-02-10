@@ -2,7 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
 
-from ..models.tags import TransactionType
+from ..types import TransactionType
 
 
 class SubCategory(BaseModel):
