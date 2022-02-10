@@ -1,16 +1,10 @@
-import enum
-
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.orm import relationship
 
 from ..config.database import Base
-
-
-class TransactionType(enum.Enum):
-    Income = "Income"
-    Expense = "Expense"
+from ..types import TransactionType
 
 
 class Label(Base):
