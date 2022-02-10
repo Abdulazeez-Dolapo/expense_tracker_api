@@ -27,7 +27,7 @@ class CreateCategoryResponse(Category, BaseModel):
         orm_mode = True
 
 
-class CategoryList(Category):
+class FullCategory(Category):
     subcategories: List[SubCategory]
 
     class Config:
@@ -35,14 +35,14 @@ class CategoryList(Category):
 
 
 class FetchAllCategoriesResponse(BaseModel):
-    categories: List[CategoryList]
+    categories: List[FullCategory]
 
     class Config:
         orm_mode = True
 
 
 class FetchCategoryResponse(BaseModel):
-    category: Category
+    category: FullCategory
 
     class Config:
         orm_mode = True
