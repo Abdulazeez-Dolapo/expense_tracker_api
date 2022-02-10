@@ -3,6 +3,7 @@ import enum
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.orm import relationship
 
 from ..config.database import Base
 
@@ -36,6 +37,7 @@ class Category(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
+    subcategories = relationship("SubCategory", lazy="joined")
 
 
 class SubCategory(Base):

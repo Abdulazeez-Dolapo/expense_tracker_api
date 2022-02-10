@@ -2,11 +2,11 @@ from fastapi import status, Depends, APIRouter
 from fastapi.exceptions import HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-
+from sqlalchemy.sql.functions import func
 
 from ..oauth2 import get_current_user, get_current_user_if_token
 from ..config.database import get_db
-from ..models.tags import Category
+from ..models.tags import Category, SubCategory
 from ..schemas.category import (
     CategoryRequest,
     CreateCategoryResponse,
@@ -55,7 +55,10 @@ async def fetch_categories(
     try:
         offset = (page - 1) * limit
 
-        base_query = db.query(Category)
+        base_query = db.query(Category).join(
+            SubCategory, SubCategory.category_id == Category.id, isouter=True
+        )
+
         where_query = (
             base_query.filter(Category.user_id == None)
             if user == None

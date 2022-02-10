@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from ..models.tags import TransactionType
+from ..schemas.subcategory import SubCategory
 
 
 class Category(BaseModel):
@@ -26,8 +27,15 @@ class CreateCategoryResponse(Category, BaseModel):
         orm_mode = True
 
 
+class CategoryList(Category):
+    subcategories: List[SubCategory]
+
+    class Config:
+        orm_mode = True
+
+
 class FetchAllCategoriesResponse(BaseModel):
-    categories: List[Category]
+    categories: List[CategoryList]
 
     class Config:
         orm_mode = True
