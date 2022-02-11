@@ -7,7 +7,11 @@ from ..oauth2 import get_current_user
 from ..config.database import get_db
 from ..models.transaction import Transaction
 from ..models.transaction_label import TransactionLabel
-from ..schemas.transaction import CreateTransactionRequest, CreateTransactionResponse
+from ..schemas.transaction import (
+    CreateTransactionRequest,
+    CreateTransactionResponse,
+    EditTransactionRequest,
+)
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -51,3 +55,39 @@ async def create_transaction(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while trying to create a transaction.",
         )
+
+
+@router.put("/{id}", response_model=CreateTransactionResponse)
+async def update_transaction(
+    id: int,
+    transaction: EditTransactionRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    transaction_query = db.query(Transaction).filter(Transaction.id == id)
+    stored_transaction = transaction_query.first()
+
+    if stored_transaction == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction with id {id} not found",
+        )
+
+    if stored_transaction.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only edit transactions you created",
+        )
+
+    try:
+        transaction_query.update(transaction.dict(), synchronize_session=False)
+        db.commit()
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while trying to update the transaction.",
+        )
+
+    return stored_transaction

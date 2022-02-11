@@ -23,7 +23,7 @@ class Transaction(BaseModel):
         orm_mode = True
 
 
-class CreateTransactionRequest(BaseModel):
+class TransactionRequest(BaseModel):
     name: str
     amount: float
     date: date
@@ -31,10 +31,21 @@ class CreateTransactionRequest(BaseModel):
     category_id: int
     subcategory_id: int
     status: StatusType
-    labels: List[int]
     notes: str
     transaction_type: TransactionType
 
+    class Config:
+        orm_mode = True
+
+
+class CreateTransactionRequest(TransactionRequest, BaseModel):
+    labels: List[int]
+
+    class Config:
+        orm_mode = True
+
+
+class EditTransactionRequest(TransactionRequest, BaseModel):
     class Config:
         orm_mode = True
 
