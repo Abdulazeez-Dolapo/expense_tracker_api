@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .routers import root, auth, label, category, subcategory, transaction
 from .config.env import environment_variables
 
-app = FastAPI()
+app = FastAPI(title="Expense Tracker")
 
 allowed_origins = ["*"]
 
