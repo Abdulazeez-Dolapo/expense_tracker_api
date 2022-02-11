@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-
+from sqlalchemy.orm import relationship
 
 from ..config.database import Base
 
@@ -15,3 +15,4 @@ class TransactionLabel(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
+    label = relationship("Label", lazy="joined")

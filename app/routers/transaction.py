@@ -2,7 +2,6 @@ from fastapi import status, Depends, APIRouter
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 
-
 from ..oauth2 import get_current_user
 from ..config.database import get_db
 from ..models.transaction import Transaction
@@ -11,6 +10,7 @@ from ..schemas.transaction import (
     CreateTransactionRequest,
     CreateTransactionResponse,
     EditTransactionRequest,
+    FetchTransactionResponse,
 )
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -91,3 +91,36 @@ async def update_transaction(
         )
 
     return stored_transaction
+
+
+@router.get("/{id}", response_model=FetchTransactionResponse)
+async def fetch_transaction(
+    id: int,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    query = (
+        db.query(Transaction)
+        .join(
+            TransactionLabel,
+            TransactionLabel.transaction_id == Transaction.id,
+            isouter=True,
+        )
+        .filter(Transaction.id == id)
+    )
+
+    transaction = query.first()
+
+    if transaction == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"transaction with id {id} not found",
+        )
+
+    if transaction.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only see transactions you created",
+        )
+
+    return transaction
