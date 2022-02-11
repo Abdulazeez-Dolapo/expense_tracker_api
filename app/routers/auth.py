@@ -19,33 +19,26 @@ def login(
     user_credentials: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db),
 ):
-    try:
-        user = db.query(User).filter(User.email == user_credentials.username).first()
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid credentials"
-            )
+    user = db.query(User).filter(User.email == user_credentials.username).first()
 
-        isPasswordValid = verify_password(user_credentials.password, user.password)
-
-        if not isPasswordValid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid credentials"
-            )
-
-        token = create_access_token(
-            data={"user_id": user.id}, time_to_expire=ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-        return {"access_token": token, "token_type": "bearer"}
-
-    except Exception as e:
-        print(e)
+    if not user:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while trying to login.",
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid credentials"
         )
+
+    isPasswordValid = verify_password(user_credentials.password, user.password)
+
+    if not isPasswordValid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid credentials"
+        )
+
+    token = create_access_token(
+        data={"user_id": user.id}, time_to_expire=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post(
