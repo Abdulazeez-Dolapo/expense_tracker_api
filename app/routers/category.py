@@ -54,7 +54,7 @@ async def fetch_categories(
     page: int = 1,
 ):
     try:
-        offset = (page - 1) * limit
+        offset = ((page - 1) * limit) + 1
 
         base_query = db.query(Category).join(
             SubCategory, SubCategory.category_id == Category.id, isouter=True

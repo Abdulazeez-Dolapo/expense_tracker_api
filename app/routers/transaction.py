@@ -137,7 +137,7 @@ async def fetch_transactions(
     page: int = 1,
 ):
     try:
-        offset = (page - 1) * limit
+        offset = ((page - 1) * limit) + 1
 
         query = db.query(Transaction).join(
             TransactionLabel,
