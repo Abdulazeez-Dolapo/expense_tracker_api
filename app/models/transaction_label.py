@@ -6,7 +6,7 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP
 from ..config.database import Base
 
 
-class TransactionLabels(Base):
+class TransactionLabel(Base):
     __tablename__ = "transaction_labels"
 
     id = Column(Integer, primary_key=True, nullable=False)
