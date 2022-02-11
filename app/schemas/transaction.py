@@ -82,3 +82,18 @@ class FetchAllTransactionsResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CreateTransactionLabelRequest(BaseModel):
+    transaction_id: int
+    labels: List[int]
+
+    class Config:
+        orm_mode = True
+
+
+class CreateTransactionLabelResponse(BaseModel):
+    message: str
+
+    class Config:
+        orm_mode = True

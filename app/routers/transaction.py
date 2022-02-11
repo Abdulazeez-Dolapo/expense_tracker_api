@@ -12,6 +12,8 @@ from ..schemas.transaction import (
     EditTransactionRequest,
     FetchTransactionResponse,
     FetchAllTransactionsResponse,
+    CreateTransactionLabelRequest,
+    CreateTransactionLabelResponse,
 )
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -184,3 +186,57 @@ async def delete_transaction(
     db.commit()
 
     return
+
+
+@router.post(
+    "/transaction_labels",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CreateTransactionLabelResponse,
+)
+async def create_transaction_labels(
+    transaction_label: CreateTransactionLabelRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+
+    copied_transaction_label = transaction_label.dict().copy()
+
+    labels = copied_transaction_label["labels"]
+    transaction_id = copied_transaction_label["transaction_id"]
+
+    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+
+    if transaction == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction with id {transaction_id} not found",
+        )
+
+    if transaction.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only add labels to transactions you created",
+        )
+
+    try:
+        db.query(TransactionLabel).filter(
+            TransactionLabel.transaction_id == transaction_id
+        ).delete(synchronize_session=False)
+
+        new_transaction_label = []
+
+        for label_id in labels:
+            new_transaction_label.append(
+                {"label_id": label_id, "transaction_id": transaction_id}
+            )
+
+        db.bulk_insert_mappings(TransactionLabel, new_transaction_label)
+        db.commit()
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while trying to delete or add to the TransactionLabel.",
+        )
+
+    return {"message": "Labels added successfully."}
