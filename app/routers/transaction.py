@@ -158,3 +158,29 @@ async def fetch_transactions(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred while trying to fetch transactions.",
         )
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_transaction(
+    id: int, db: Session = Depends(get_db), user: dict = Depends(get_current_user)
+):
+    query = db.query(Transaction).filter(Transaction.id == id)
+
+    transaction = query.first()
+
+    if transaction == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction with id {id} not found",
+        )
+
+    if transaction.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"You can only delete transactions you created",
+        )
+
+    query.delete(synchronize_session=False)
+    db.commit()
+
+    return

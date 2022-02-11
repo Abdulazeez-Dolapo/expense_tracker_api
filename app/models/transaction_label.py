@@ -11,7 +11,9 @@ class TransactionLabel(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     label_id = Column(Integer, ForeignKey("labels.id"), nullable=True)
-    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True)
+    transaction_id = Column(
+        Integer, ForeignKey("transactions.id", ondelete="CASCADE"), nullable=True
+    )
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
