@@ -75,3 +75,10 @@ class FetchTransactionResponse(Transaction, BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class FetchAllTransactionsResponse(BaseModel):
+    transactions: List[FetchTransactionResponse]
+
+    class Config:
+        orm_mode = True

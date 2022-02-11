@@ -11,6 +11,7 @@ from ..schemas.transaction import (
     CreateTransactionResponse,
     EditTransactionRequest,
     FetchTransactionResponse,
+    FetchAllTransactionsResponse,
 )
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
@@ -124,3 +125,36 @@ async def fetch_transaction(
         )
 
     return transaction
+
+
+@router.get("/", response_model=FetchAllTransactionsResponse)
+async def fetch_transactions(
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+    limit: int = 20,
+    page: int = 1,
+):
+    try:
+        offset = (page - 1) * limit
+
+        query = db.query(Transaction).join(
+            TransactionLabel,
+            TransactionLabel.transaction_id == Transaction.id,
+            isouter=True,
+        )
+
+        transactions = (
+            query.filter(Transaction.user_id == user.id)
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        return {"transactions": transactions}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while trying to fetch transactions.",
+        )
